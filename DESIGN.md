@@ -1,0 +1,2 @@
+# StudyCircle design
+Operate mode. Pair an ink-blue sidebar with a warm-white workspace, an indigo featured action, and muted teal and lilac subject accents. Use Manrope for headings and DM Sans for controls. The circle mark represents two people sharing an open book. Make room for a high-contrast dashboard heading, then organize the workspace into study activity and near-term actions. Use the same line-icon family, focus styles and border system across sections.

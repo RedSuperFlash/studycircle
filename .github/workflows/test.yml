@@ -1,0 +1,56 @@
+name: Verify StudyCircle
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  app:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run test:db
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - run: npm run e2e
+      - run: node tests/e2e/pwa.mjs
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: classroom-test-results
+          path: test-results/
+  supabase:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npx --yes supabase@3.4.0 start -x studio,imgproxy,logflare,vector,supavisor
+      - name: Configure private local test stack
+        shell: bash
+        run: |
+          eval "$(npx --yes supabase@3.4.0 status -o env --output-format text)"
+          echo "::add-mask::$SERVICE_ROLE_KEY"
+          {
+            printf 'E2E_SUPABASE_URL=%s\n' "$API_URL"
+            printf 'E2E_SUPABASE_KEY=%s\n' "${PUBLISHABLE_KEY:-$ANON_KEY}"
+            printf 'E2E_SUPABASE_SERVICE_KEY=%s\n' "$SERVICE_ROLE_KEY"
+          } >> "$GITHUB_ENV"
+      - run: npm run e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: supabase-test-results
+          path: test-results/
