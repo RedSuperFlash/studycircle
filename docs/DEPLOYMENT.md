@@ -18,7 +18,7 @@
 
 1. Push the source to the approved repository after authorization. Choose **GitHub Actions** in **Settings → Pages**.
 2. Set repository Actions variables `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY`. Both are public client values.
-3. Manually dispatch **Publish StudyCircle to GitHub Pages**. The workflow verifies the app and uploads the static build to the `github-pages` environment. Share the resulting URL after the live check.
+3. Manually dispatch **Publish StudyCircle to GitHub Pages**. Choose `live` for the configured Supabase backend or `classroom-demo` for the labelled fictional workspace. The workflow verifies the app and uploads the static build to the `github-pages` environment.
 
 ## Optional browser push
 

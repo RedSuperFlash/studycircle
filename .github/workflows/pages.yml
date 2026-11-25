@@ -1,6 +1,14 @@
 name: Publish StudyCircle to GitHub Pages
 on:
   workflow_dispatch:
+    inputs:
+      mode:
+        description: Deployment mode
+        type: choice
+        default: live
+        options:
+          - live
+          - classroom-demo
 permissions:
   contents: read
   pages: write
@@ -12,9 +20,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
-      VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
-      VITE_WEB_PUSH_PUBLIC_KEY: ${{ vars.VITE_WEB_PUSH_PUBLIC_KEY }}
+      VITE_SUPABASE_URL: ${{ inputs.mode == 'live' && vars.VITE_SUPABASE_URL || '' }}
+      VITE_SUPABASE_PUBLISHABLE_KEY: ${{ inputs.mode == 'live' && vars.VITE_SUPABASE_PUBLISHABLE_KEY || '' }}
+      VITE_WEB_PUSH_PUBLIC_KEY: ${{ inputs.mode == 'live' && vars.VITE_WEB_PUSH_PUBLIC_KEY || '' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -25,11 +33,12 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run test:db
-      - name: Build authorized live frontend
+      - name: Check live backend configuration
+        if: inputs.mode == 'live'
         run: |
           test -n "$VITE_SUPABASE_URL"
           test -n "$VITE_SUPABASE_PUBLISHABLE_KEY"
-          npm run build
+      - run: npm run build
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
